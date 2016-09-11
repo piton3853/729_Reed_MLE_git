@@ -65,10 +65,21 @@ The `csv` file located at this link https://vincentarelbundock.github.io/Rdatase
 * Create a cross tab that shows vote choice (rows) by party identification (columns). *<span style="color:orange">Report your results</span>*.
 
 ```{r, vincent bundock, echo=TRUE}
-presidents <- read.csv("presidents.csv")
-my.table(vote_choice,identification)
+rm(list=ls())
+cat("\014")
+#presidents <- read.csv("http://vincentarelbundock.github.io/Rdatasets/csv/pscl/vote92.csv")
+# if making the script from scratch, uncomment the presidents object immediately above then run save() and load() below.  All times after the first time just load("presidents.RData")
+save(presidents, file = ("presidents.RData"))
+load("presidents.RData"")
+View(presidents)
+my.table <- table(vote_choice,identification); my.table
+plot(vote)
 ```
 * Use the `prop.table` command to get the column percentages. *<span style="color:orange">Report your results</span>*
 ```{r, prop.table, echo=TRUE}
 prop.table(vote_choice,identification)
+
+#Hi everyone, I was looking at the homework, and am wondering what question 2.2, second bullet is asking.  It says to create a cross-tab of vote choice and party identification.  However, when viewing the data neither of those variables exist.  Here's a screenshot.  I am thinking that the variable 'vote' is a categorical variable, so we need it to be transformed 
 ```
+
+
