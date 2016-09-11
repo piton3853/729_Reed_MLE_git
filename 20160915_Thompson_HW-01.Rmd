@@ -67,19 +67,28 @@ The `csv` file located at this link https://vincentarelbundock.github.io/Rdatase
 ```{r, vincent bundock, echo=TRUE}
 rm(list=ls())
 cat("\014")
+library(dplyr, tidyr)
 #presidents <- read.csv("http://vincentarelbundock.github.io/Rdatasets/csv/pscl/vote92.csv")
-# if making the script from scratch, uncomment the presidents object immediately above then run save() and load() below.  All times after the first time just load("presidents.RData")
-save(presidents, file = ("presidents.RData"))
-load("presidents.RData"")
-View(presidents)
-my.table <- table(vote_choice,identification); my.table
-plot(vote)
+#save(presidents, file = ("presidents.RData"))
+# if making the script from scratch, uncomment the presidents object immediately above then run load() below.  All times after the first time just load("presidents.RData")
+load("presidents.RData")
 ```
+```{r, vincent bundock, echo=TRUE}
+dem2 <- ifelse(presidents$dem == 1, "democrat", "republican")
+rep2 <- ifelse(presidents$rep == 1, "republican", "democrat")
+presidents <- presidents %>%
+cbind(presidents,dem2,rep2)
+str(presidents)
+#mutate(presidents, party_id = dem2 + rep2) # this is not working for me!!!!
+str(presidents)
+#my.table <- table(presidents$vote,presidents$party_id); my.table
+```
+
+
 * Use the `prop.table` command to get the column percentages. *<span style="color:orange">Report your results</span>*
 ```{r, prop.table, echo=TRUE}
-prop.table(vote_choice,identification)
+#prop.table(vote,party_id)
 
-#Hi everyone, I was looking at the homework, and am wondering what question 2.2, second bullet is asking.  It says to create a cross-tab of vote choice and party identification.  However, when viewing the data neither of those variables exist.  Here's a screenshot.  I am thinking that the variable 'vote' is a categorical variable, so we need it to be transformed 
 ```
 
 
