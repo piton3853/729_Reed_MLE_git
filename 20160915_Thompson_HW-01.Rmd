@@ -64,7 +64,7 @@ The `csv` file located at this link [https://vincentarelbundock.github.io/Rdatas
 
 * Create a cross tab that shows vote choice (rows) by party identification (columns). *<span style="color:orange">Report your results</span>*.
 
-```{r, crosstab, echo=TRUE}
+```{r, load data, echo=TRUE}
 rm(list=ls())
 cat("\014")
 #presidents <- read.csv("http://vincentarelbundock.github.io/Rdatasets/csv/pscl/vote92.csv")
@@ -72,13 +72,13 @@ cat("\014")
 # if making the script from scratch, uncomment the presidents object immediately above then run load() below.  All times after the first time just load("presidents.RData")
 load("presidents.RData")
 ```
-```{r, load library, echo=FALSE}
-library(dplyr)
-```
+
 ```{r, crosstab, echo=TRUE}
-presidents <- presidents %>%
-  mutate(party = ifelse(dem == 1, "Democrat", "Republican"))
-my.table <- table(presidents$vote,presidents$party); my.table
+presidents$party[presidents$dem==1]<-"Democrat"
+presidents$party[presidents$rep==1]<-"Republican"
+presidents$party[presidents$rep==0 & presidents$dem==0]<-"Other"
+my.table <- table(presidents[,"vote"],presidents[,"party"]); my.table
+
 ```
 
 

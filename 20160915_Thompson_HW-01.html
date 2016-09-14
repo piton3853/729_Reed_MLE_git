@@ -165,32 +165,24 @@ cat(&quot;\014&quot;)</code></pre>
 #save(presidents, file = (&quot;presidents.RData&quot;))
 # if making the script from scratch, uncomment the presidents object immediately above then run load() below.  All times after the first time just load(&quot;presidents.RData&quot;)
 load(&quot;presidents.RData&quot;)</code></pre>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>presidents &lt;- presidents %&gt;%
-  mutate(party = ifelse(dem == 1, &quot;Democrat&quot;, &quot;Republican&quot;))
-my.table &lt;- table(presidents$vote,presidents$party); my.table</code></pre>
+<pre class="r"><code>presidents$party[presidents$dem==1]&lt;-&quot;Democrat&quot;
+presidents$party[presidents$rep==1]&lt;-&quot;Republican&quot;
+presidents$party[presidents$rep==0 &amp; presidents$dem==0]&lt;-&quot;Other&quot;
+my.table &lt;- table(presidents[,&quot;vote&quot;],presidents[,&quot;party&quot;]); my.table</code></pre>
 <pre><code>##          
-##           Democrat Republican
-##   Bush          23        287
-##   Clinton      356         60
-##   Perot         65        118</code></pre>
+##           Democrat Other Republican
+##   Bush          23    13        274
+##   Clinton      356    30         30
+##   Perot         65    31         87</code></pre>
 <ul>
 <li>Use the <code>prop.table</code> command to get the column percentages. <em><span style="color:orange">Report your results</span></em></li>
 </ul>
 <pre class="r"><code>prop.table(my.table,2)</code></pre>
 <pre><code>##          
-##            Democrat Republican
-##   Bush    0.0518018  0.6172043
-##   Clinton 0.8018018  0.1290323
-##   Perot   0.1463964  0.2537634</code></pre>
+##             Democrat      Other Republican
+##   Bush    0.05180180 0.17567568 0.70076726
+##   Clinton 0.80180180 0.40540541 0.07672634
+##   Perot   0.14639640 0.41891892 0.22250639</code></pre>
 </div>
 </div>
 
