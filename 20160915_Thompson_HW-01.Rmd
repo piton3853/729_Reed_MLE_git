@@ -13,10 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 Find the Maximum Likelihood Estimate for $\pi$.
 
 * The probability model of the binomial distribution is:  
-$$f(y|n,\pi)={{n}\choose{y}}\pi^y(1-\pi)^n-y$$
+$$f(y|n,\pi)={{n}\choose{y}}\pi^y(1-\pi)^{n-y}$$
 
 * Step 1:  Write down the likelihood function (I did this step for you):
-$$\mathcal{L}(\pi|y,n)=p(y|n,\pi) = {{n}\choose{y}}\pi^y(1-\pi)^n-y$$
+$$\mathcal{L}(\pi|y,n)=p(y|n,\pi) = {{n}\choose{y}}\pi^y(1-\pi)^{n-y}$$
 
 * Step 2:  Take the log and reduce
 $$log \mathcal{L}(\pi|y,n) = \sum_{i=1}^n log \pi^y * \sum_{i=1}^n log(1-\pi)^{n-y}$$
