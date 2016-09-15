@@ -19,8 +19,8 @@ $$f(y|n,\pi)={{n}\choose{y}}\pi^y(1-\pi)^n-y$$
 $$\mathcal{L}(\pi|y,n)=p(y|n,\pi) = {{n}\choose{y}}\pi^y(1-\pi)^n-y$$
 
 * Step 2:  Take the log and reduce
-$$\mathcal{L}(\pi|y,n) = \sum_{i=1}^n log \pi^y * \sum_{i=1}^n log(1-\pi)^{n-y}$$
-$$\mathcal{L}(\pi|y,n) = \sum_{i=1}^n y\ log \pi * \sum_{i=1}^n (n-y)\ log(1-\pi)$$
+$$log \mathcal{L}(\pi|y,n) = \sum_{i=1}^n log \pi^y * \sum_{i=1}^n log(1-\pi)^{n-y}$$
+$$log \mathcal{L}(\pi|y,n) = \sum_{i=1}^n y\ log \pi * \sum_{i=1}^n (n-y)\ log(1-\pi)$$
 
 * Step 3:  Maximize and find the most likely value for $\pi$ (Start with the log-likelihood and take the derivative with respect to the parameter).
 $$\frac{dlog\mathcal{L}}{d\pi} = n\bar{y}\log\pi + (n-\bar{y})n\log(1-\pi) \rightarrow$$
@@ -84,7 +84,7 @@ my.table <- table(presidents[,"vote"],presidents[,"party"]); my.table
 
 * Use the `prop.table` command to get the column percentages. *<span style="color:orange">Report your results</span>*
 ```{r, prop.table, echo=TRUE}
-prop.table(my.table,2)
+prop.table(my.table,2)*100
 ```
 
 

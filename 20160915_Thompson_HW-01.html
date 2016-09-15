@@ -130,7 +130,7 @@ $(document).ready(function () {
 <li><p>The probability model of the binomial distribution is:<br />
 <span class="math display">\[f(y|n,\pi)={{n}\choose{y}}\pi^y(1-\pi)^n-y\]</span></p></li>
 <li><p>Step 1: Write down the likelihood function (I did this step for you): <span class="math display">\[\mathcal{L}(\pi|y,n)=p(y|n,\pi) = {{n}\choose{y}}\pi^y(1-\pi)^n-y\]</span></p></li>
-<li><p>Step 2: Take the log and reduce <span class="math display">\[\mathcal{L}(\pi|y,n) = \sum_{i=1}^n log \pi^y * \sum_{i=1}^n log(1-\pi)^{n-y}\]</span> <span class="math display">\[\mathcal{L}(\pi|y,n) = \sum_{i=1}^n y\ log \pi * \sum_{i=1}^n (n-y)\ log(1-\pi)\]</span></p></li>
+<li><p>Step 2: Take the log and reduce <span class="math display">\[log \mathcal{L}(\pi|y,n) = \sum_{i=1}^n log \pi^y * \sum_{i=1}^n log(1-\pi)^{n-y}\]</span> <span class="math display">\[log \mathcal{L}(\pi|y,n) = \sum_{i=1}^n y\ log \pi * \sum_{i=1}^n (n-y)\ log(1-\pi)\]</span></p></li>
 <li><p>Step 3: Maximize and find the most likely value for <span class="math inline">\(\pi\)</span> (Start with the log-likelihood and take the derivative with respect to the parameter). <span class="math display">\[\frac{dlog\mathcal{L}}{d\pi} = n\bar{y}\log\pi + (n-\bar{y})n\log(1-\pi) \rightarrow\]</span> <span class="math display">\[ \Rightarrow \frac{n\bar{y}}{\pi}-\frac{(n-y)n}{(1-\pi)} = 0 \rightarrow \frac{\bar{y}}{\pi}-\frac{(n-y)}{(1-\pi)} = 0 \rightarrow\]</span> <span class="math display">\[ \Rightarrow \frac{\bar{y}}{\pi}=\frac{(n-y)}{(1-\pi)} \rightarrow \bar{y}(1-\pi)=\pi(n-y) \rightarrow\]</span> <span class="math display">\[ \Rightarrow \bar{y}-\pi\bar{y} = \pi n - \pi \bar{y} \rightarrow \bar{y} = \pi n\]</span></p></li>
 </ul>
 </div>
@@ -177,12 +177,12 @@ my.table &lt;- table(presidents[,&quot;vote&quot;],presidents[,&quot;party&quot;
 <ul>
 <li>Use the <code>prop.table</code> command to get the column percentages. <em><span style="color:orange">Report your results</span></em></li>
 </ul>
-<pre class="r"><code>prop.table(my.table,2)</code></pre>
+<pre class="r"><code>prop.table(my.table,2)*100</code></pre>
 <pre><code>##          
-##             Democrat      Other Republican
-##   Bush    0.05180180 0.17567568 0.70076726
-##   Clinton 0.80180180 0.40540541 0.07672634
-##   Perot   0.14639640 0.41891892 0.22250639</code></pre>
+##            Democrat     Other Republican
+##   Bush     5.180180 17.567568  70.076726
+##   Clinton 80.180180 40.540541   7.672634
+##   Perot   14.639640 41.891892  22.250639</code></pre>
 </div>
 </div>
 
