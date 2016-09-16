@@ -16,7 +16,9 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 setwd("/Users/Nick/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
-wdata <- read.table("world.csv", sep = ",",header = T)
+#wdata <- read.table("world.csv", sep = ",",header = T)
+#save(wdata, file = "wdata.RData")
+load("wdata.RData")
 ```
 
 <center> <h1>Homework 2 - GVPT 729A</h1> </center>
@@ -28,7 +30,18 @@ https://raw.githubusercontent.com/Neilblund/729A/master/data/world.csv
 The dataset at the link above contains information on cross national voter turnout (votevap) among the voting eligible population and per-capita GDP (gdppcap08).
 
 1. Estimate the effect of per-capita GDP on voter turnout using OLS.
+
+```{r ols, include=TRUE}
+ols_01 <- lm(wdata$vote~wdata$gdppcap08); ols_01
+```
+
 2. Estimate the effect of per-capita GDP on voter turnout using the maxi- mum likelihood estimator.
+
+```{r MLE estimator, include=TRUE}
+
+
+```
+
 3. Take random samples of size 40, 30, and 20 from your dataset. Estimate the same model you used in questions to answer questions 1 and 2, and compare your results.
 
     * What differences do you notice between the OLS and MLE results? 
