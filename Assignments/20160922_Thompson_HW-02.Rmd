@@ -3,6 +3,9 @@ title: "20160922_Thompson_MLE_HW-02"
 author: "Nick Thompson"
 date: "9/16/2016"
 output: html_document
+header-includes:
+  - \setlength{\parindent}{4em}
+  - \setlength{\parskip}{0em}
 ---
 
 ```{r setup, include=FALSE}
@@ -14,5 +17,42 @@ library(ggplot2)
 library(tidyr)
 setwd("/Users/Nick/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
 wdata <- read.table("world.csv", sep = ",",header = T)
+```
+
+<center> <h1>Homework 2 - GVPT 729A</h1> </center>
+
+Answer the following questions. Include your code, and report all the results you used to answer the questions.
+
+https://raw.githubusercontent.com/Neilblund/729A/master/data/world.csv
+
+The dataset at the link above contains information on cross national voter turnout (votevap) among the voting eligible population and per-capita GDP (gdppcap08).
+
+1. Estimate the effect of per-capita GDP on voter turnout using OLS.
+2. Estimate the effect of per-capita GDP on voter turnout using the maxi- mum likelihood estimator.
+3. Take random samples of size 40, 30, and 20 from your dataset. Estimate the same model you used in questions to answer questions 1 and 2, and compare your results.
+
+    * What differences do you notice between the OLS and MLE results? 
+
+    * What characteristics of MLE and OLS estimators explain these dif-
+ferences?
+
+## notes
+
+* Turning off scientific notation can make it a little easier to make compar- isons between your results. Use the command:
+```{r options,include=TRUE} 
+options(scipen=999)
+```
+To turn off scientific notation. Turn it back on by resetting ”scipen=0”
+
+* You can format your tables however you see fit, but make sure you include the relevant information.
+
+* http://www.statmethods.net/management/subset.htmlhascodefortak- ing random subsets from a data frame.
+
+* If you want to reproduce your results later, you can set R’s random number seed with this command:
+
+*<span style="color:purple">#the number itself doesn't matters</span>*
+
+```{r set seed, include=TRUE}
+set.seed(1000)
 ```
 
