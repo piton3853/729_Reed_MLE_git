@@ -1,0 +1,18 @@
+---
+title: "20160922_Thompson_MLE_HW-02"
+author: "Nick Thompson"
+date: "9/16/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+cat("\014")
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+setwd("/Users/Nick/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
+wdata <- read.table("world.csv", sep = ",",header = T)
+```
+
