@@ -35,7 +35,7 @@ The dataset at the link above contains information on cross national voter turno
 ols_01 <- lm(wdata$vote~wdata$gdppcap08); ols_01
 ```
 
-2. Estimate the effect of per-capita GDP on voter turnout using the maxi- mum likelihood estimator.
+2. Estimate the effect of per-capita GDP on voter turnout using the maximum likelihood estimator.
 
 ```{r MLE estimator, include=TRUE}
 
