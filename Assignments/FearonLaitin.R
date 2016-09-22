@@ -10,8 +10,10 @@ setwd("/Users/Nick/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
 #repdata <- read.dta("repdata.dta")
 #save(repdata, file = "repdata.RData")
 load("repdata.RData")
-View(repdata)
-summary(repdata$onset)
+#View(repdata)
+attach(repdata)
+summary(onset,mtnest,gdpen)
+
 repdata <- repdata %>%
   filter(onset<4)
 model.1 <- glm(onset~gdpen+gdpenl+lpop+lmtnest+ncontig+
@@ -63,3 +65,5 @@ model.3 <- glm(onset~gdpen+gdpenl+lpop+lmtnest+
                  ethfrac+relfrac,
                family = binomial(link="logit"),
                data = repdata); summary(model.3)
+
+stargazer(model.1, model.1l, model.3, type='text')
