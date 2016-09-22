@@ -18,6 +18,7 @@ est.norm <- function(y) {
   return(res)
 }
 
+est.norm(votevap)
 # data
 y <- c(1.2, 3, 4.2)
 # estimate mean
