@@ -67,3 +67,7 @@ model.3 <- glm(onset~gdpen+gdpenl+lpop+lmtnest+
                data = repdata); summary(model.3)
 
 stargazer(model.1, model.1l, model.3, type='text')
+
+plot(model.3)
+plot(model.1)
+plot(model.1l)

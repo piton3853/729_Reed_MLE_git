@@ -2,7 +2,7 @@
 title: "20160922_Thompson_MLE_HW-02"
 author: "Nick Thompson"
 date: "9/16/2016"
-output: pdf_document
+output: html_document
 header-includes:
 - \setlength{\parindent}{4em}
 - \setlength{\parskip}{0em}
@@ -41,6 +41,8 @@ stargazer(ols_01, type = "text")
 * On average a one unit change in per-capita GDP correlates to a 0.000197 unit change in voter turnout.  Statistically significant at p<0.05.
 
 2. Estimate the effect of per-capita GDP on voter turnout using the maximum likelihood estimator.
+
+*  This is nearly identical to the OLS model.  On average a one unit change in per-capita GDP correlates to a 0.000197 unit change in voter turnout.
 
 ```{r MLE estimator, warning=FALSE, message=FALSE, include=TRUE}
 attach(wdata)
@@ -183,7 +185,7 @@ Table 1 shows a side by side comparison of all the results.  The standard errors
 
 * What characteristics of MLE and OLS estimators explain these differences?
 
-Asymptotic consistency is responsible for the variation in standard errors.
+In the MLE model, asymptotic consistency--rather in this case inconsistency--is responsible for the variation in standard errors.  In the OLS model bias causes the variation in standard errors.  In the OLS model, they all remain nearly identical because the data does not have bias.
 
     
 ## notes
