@@ -1,8 +1,9 @@
 rm(list=ls())
 cat("\014")
 
-X<- cbind(4,runif(10000))
-View(X)
+X <- cbind(1,gdppcap08)
+y <- votevap
+
 theta.true<-c(2,3,1)
 y<-X%*%theta.true[1:2] + rnorm(100)
 
@@ -19,6 +20,8 @@ ols.lf<-function(theta,y,X){
 
 p<-optim(c(1,1,1),ols.lf,method="BFGS",hessian=T,y=y,X=X)
 p
+
+
 Fisher<-solve(p$hessian)
 Fisher
 sqrt(diag(Fisher))

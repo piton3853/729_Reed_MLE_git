@@ -20,7 +20,6 @@ setwd("/Users/Nick/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
 #wdata <- read.table("world.csv", sep = ",",header = T)
 #save(wdata, file = "wdata.RData")
 load("wdata.RData")
-options(scipen = 999)
 ```
 
 <center> <h1>Homework 2 - GVPT 729A</h1> </center>
@@ -41,49 +40,161 @@ stargazer(ols_01, type = "text")
 2. Estimate the effect of per-capita GDP on voter turnout using the maximum likelihood estimator.
 
 ```{r MLE estimator, include=TRUE}
-# log-likelihood for normal
-ll.fn.norm <- function(mu, y) {
-  -sum((y - mu)^2)
+attach(wdata)
+X <- cbind(1,gdppcap08)
+y <- votevap
+
+ols.lf<-function(theta,y,X){
+  n<-nrow(X)
+  k<-ncol(X)
+  beta<-theta[1:k]
+  sigma2<-theta[k+1]
+  e<-y-X%*%beta
+  logl<- -.5*n*log(2*pi)-.5*n*log(sigma2)-
+    ((t(e)%*%e)/(2*sigma2))
+  return(-logl)
 }
 
-
-# function to estimate normal model
-est.norm <- function(y) {
-  est <- optim(par = 0, fn = ll.fn.norm, y = y,
-               control = list(fnscale = -1),
-               method = "Brent",  # for 1d problems
-               lower = -100, upper = 100)
-  if (est$convergence != 0) print("Model did not converge!")
-  res <- list(est = est$par)
-  return(res)
-}
-
-est.norm(wdata$votevap)
+p<-optim(c(1,1,1),ols.lf,method="BFGS",hessian=T,y=y,X=X)
+p
 
 ```
 
-3. Take random samples of size 40, 30, and 20 from your dataset. Estimate the same model you used in questions to answer questions 1 and 2, and compare your results.
+3. Take random samples of size 40, 30, and 20 from your dataset. Use the same model you used to answer questions 1 and 2, and compare your results.
 
 ```{r Random Samples, include=FALSE}
-# take a random sample of size 40,30, and 20 from a dataset wdata 
-# sample without replacement
+# set scientific notation
+options(scipen = 999)
+```
+
+```{r Random Sample OLS 40, include=TRUE}
+# Attach Data for Random Sample of 40
 sample.40 <- wdata[sample(1:nrow(wdata), 40,
   	replace=FALSE),]
+attach(sample.40)
+
+# Run OLS model for Random Sample of 40.
+ols_40 <- lm(sample.40$vote~sample.40$gdppcap08)
+stargazer(ols_40, type = "text")
+
+# Run MLE model for Random Sample of 40.
+# Name variables
+X <- cbind(1,gdppcap08)
+y <- votevap
+
+ols.lf<-function(theta,y,X){
+  n<-nrow(X)
+  k<-ncol(X)
+  beta<-theta[1:k]
+  sigma2<-theta[k+1]
+  e<-y-X%*%beta
+  logl<- -.5*n*log(2*pi)-.5*n*log(sigma2)-
+    ((t(e)%*%e)/(2*sigma2))
+  return(-logl)
+}
+
+
+p.mle.40<-optim(c(1,1,1),ols.lf,method="BFGS",hessian=T,y=y,X=X)
+p.mle.40
+
+```
+Side by Side comparison
+
+## 
+## =========================================================
+##                         Dependent variable:    
+##                     -------------------------------------
+##                                vote40 (OLS)   vote40(MLE)            
+## ---------------------------------------------------------
+## gdppcap08 (OLS)               0.0003*         0.0003    
+##                              (0.0002)         (0.000)
+##             
+##                                                
+## Constant                     59.784***        60.49    
+##                               (3.470)         (0.032)    
+##                                                
+## ---------------------------------------------------------
+## Observations                    40             
+## R2                             0.088           
+## Adjusted R2                    0.064           
+## Residual Std. Error      16.404 (df = 38)      
+## F Statistic             3.687* (df = 1; 38)    
+## =========================================================
+## Note:               *p<0.1; **p<0.05; ***p<0.01
+
+Of important note, the $convergence value was 1, which means the function was not maximized.  This is likely due to the large numbers of NaNs produced when calculating sample.40 (random sample from the population).
+
+However, all of the other MLE outputs appear to be in line with the outputs from the OLS regression.
+```{r Random Sample OLS 30, include = TRUE}
 sample.30 <- wdata[sample(1:nrow(wdata), 30,
   	replace=FALSE),]
+attach(sample.30)
+
+ols_30 <- lm(sample.30$vote~sample.30$gdppcap08)
+stargazer(ols_30, type = "text")
+
+X <- cbind(1,gdppcap08)
+y <- votevap
+
+ols.lf<-function(theta,y,X){
+  n<-nrow(X)
+  k<-ncol(X)
+  beta<-theta[1:k]
+  sigma2<-theta[k+1]
+  e<-y-X%*%beta
+  logl<- -.5*n*log(2*pi)-.5*n*log(sigma2)-
+    ((t(e)%*%e)/(2*sigma2))
+  return(-logl)
+}
+
+p.mle.30<-optim(c(1,1,1),ols.lf,method="BFGS",hessian=T,y=y,X=X)
+p.mle.30
+
+```
+Independent Variable | Dependent Variable
+-------------------- | ------------------
+
+```{r table 2, include=TRUE}
+
+```
+In this model no NaNs were produced, even though the same function with a different number of random selections was requested.  As such, the maximization function worked.
+
+The values are once again very close for both the constant and the variable `gdppcap08`.
+```{r Random Sample OLS 20, include = TRUE}
 sample.20 <- wdata[sample(1:nrow(wdata), 20,
   	replace=FALSE),]
-```
-```{r Random Sample OLS, include=TRUE}
-ols_40 <- lm(sample.40$vote~sample.40$gdppcap08)
-ols_30 <- lm(sample.30$vote~sample.30$gdppcap08)
+attach(sample.20)
+
 ols_20 <- lm(sample.20$vote~sample.20$gdppcap08)
+stargazer(ols_20, type = "text")
+X <- cbind(1,gdppcap08)
+y <- votevap
+
+ols.lf<-function(theta,y,X){
+  n<-nrow(X)
+  k<-ncol(X)
+  beta<-theta[1:k]
+  sigma2<-theta[k+1]
+  e<-y-X%*%beta
+  logl<- -.5*n*log(2*pi)-.5*n*log(sigma2)-
+    ((t(e)%*%e)/(2*sigma2))
+  return(-logl)
+}
+
+p.mle.20<-optim(c(1,1,1),ols.lf,method="BFGS",hessian=T,y=y,X=X)
+p.mle.20
+
+```
+
+```{r All of the Models in a Fun Table, include = TRUE}
 stargazer(ols_40,ols_30,ols_20, type='text',
           column.labels = c("Random 40", "Random 30", 'Random 20'),
           column.separate = c(1, 1),
           model.numbers = FALSE,
           model.names = F)
+
 ```
+
     * What differences do you notice between the OLS and MLE results? 
 
     * What characteristics of MLE and OLS estimators explain these differences?
