@@ -1,0 +1,19 @@
+---
+title: "Homework 3 - GVPT 729A"
+author: "Nick Thompson"
+date: "9/30/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(foreign)
+```
+
+Answer the following questions.  Include your code, and report all the results you used to answer the questions.  https://raw.githubusercontent. com/Neilblund/729A/master/data/voterid.csv
+
+```{r data, include=TRUE}
+setwd("~/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
+voterid <- read.csv()
+
+```
