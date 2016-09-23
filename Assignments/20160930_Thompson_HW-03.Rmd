@@ -8,12 +8,62 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(foreign)
+rm(list=ls())
+cat("\014")
 ```
 
 Answer the following questions.  Include your code, and report all the results you used to answer the questions.  https://raw.githubusercontent. com/Neilblund/729A/master/data/voterid.csv
 
 ```{r data, include=TRUE}
 setwd("~/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
-voterid <- read.csv()
+#voterid <- read.csv(file = "voterid.csv",header = TRUE, sep = ",")
+#save(voterid, file = "voterid.RData")
+load("voterid.RData")
+```
 
+The link above contains data from ``Hicks et al. 2015:  A Principle or a Strategy?  Voter Identificaqtion Laws and Partisan Competition in the American States''
+
+* *photo* is equatl to $1$ if a state has legislation that requires voters to show photo ID at the polling booth, and $0$ if they do not have to have this requirement.
+
+* *fraud* is the average number of voter fraud cases prosecuted in a given state since 2001.
+
+* *election_margin* is the average partisan vote margin ($\%$ Republican - $\%$ Democratic) in a state since 2001.
+
+* *gopleg* is the average $\%$ of a state's legislature that is Republican.
+
+# Questions
+
+1. Use OLD to estimate a linear probability model using *photo* as the dependent variable, and *fraud*, *election_margin*, and *gopleg* as independent variables.  Obtain predicted probabilities that *photo* $= 1$ under two or more hypothetical scenarios.  Discuss your results.
+
+2.  Run a logistic regression model using *photo* as the dependent variable, and *fraud*, *election_margin*, and *gopleg* as independent variables.  Obtain predicted probabilities that *photo* $= 1$ under two or more hypothetical scenarios.  Discuss your results, and compare with your results from model $1$.
+
+## notes
+
+1.  There's no "right" or "wrong" scenario here, but you should think about comparing scenarios that are plausible reflections of the real world.
+
+2.  We used the code below to get predicted probabilities from the probit model.  You will need to modify this slightly to get predictions form a logit, just remember that:  $Pr(Y=1|X1,X2) = \frac{1}{1+e^-(B_0+B_1X1+B_2X2)}$
+
+```{r generic code, include=TRUE}
+set.seed(42)
+n <- 1000
+x1 <- rnorm(n)
+x2 <- rnorm(n)
+X <- cbind(1, x1, x2)
+b <- c(1, -0.5, 0.5)
+p <- pnorm(X%*%b)
+y <- rbinom(n, 1, p)
+model <- glm(y ~ x1 + x2, family = "binomial"(link = "probit"))
+
+# with x1 and x2 set at their mean
+meanx1 <- mean(x1)
+meanx2 <- mean(x2)
+pnorm(model$coefficients[1] +
+        meanx1*model$coefficients[2] +
+        meanx2*model$coefficients[3])
+
+q.x1 <- quantile(x1, 0.25)
+
+pnorm(model$coefficients[1] +
+        q.x1*model$coefficients[2] +
+        meanx2*model$coefficients[3])
 ```
