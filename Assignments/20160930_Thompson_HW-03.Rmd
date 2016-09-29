@@ -9,11 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(foreign)
 library(stargazer)
+library(knitr)
+library(gmodels)
 rm(list=ls())
 cat("\014")
 ```
 
-Answer the following questions.  Include your code, and report all the results you used to answer the questions.  https://raw.githubusercontent. com/Neilblund/729A/master/data/voterid.csv
+Answer the following questions.  Include your code, and report all the results you used to answer the questions.  https://raw.githubusercontent.com/Neilblund/729A/master/data/voterid.csv
 
 ```{r data, include=TRUE}
 setwd("~/Documents/GitHubRepo/729_Reed_MLE_git/Assignments")
@@ -40,10 +42,8 @@ The link above contains data from ``Hicks et al. 2015:  A Principle or a Strateg
 ```{r OLS, include=TRUE}
 sink("log.txt", append = TRUE, type = 'output', split=TRUE)
 model.1 <- lm(photo~fraud+election_margin+gopleg, data = voterid); summary(model.1) #stargazer(model.1, type = 'text')
-plogis(predict(model.1))
-model.1l <- glm(photo~fraud+election_margin+gopleg, data = voterid, family = 'binomial'(link='logit')); summary(model.1l)
-plogis(predict(model.1l))
-
+b1 <- predict(model.1); b1
+sink()
 ```
 
 2.  Run a logistic regression model using *photo* as the dependent variable, and *fraud*, *election_margin*, and *gopleg* as independent variables.  Obtain predicted probabilities that *photo* $= 1$ under two or more hypothetical scenarios.  Discuss your results, and compare with your results from model $1$.
