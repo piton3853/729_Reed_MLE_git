@@ -1,8 +1,8 @@
 ---
 title: "Homework 3 - GVPT 729A"
 author: "Nick Thompson"
-date: "9/30/2016"
-output: html_document
+date: "9/29/2016"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +11,8 @@ library(foreign)
 library(stargazer)
 library(knitr)
 library(gmodels)
+library(dplyr)
+library(ggplot2)
 rm(list=ls())
 cat("\014")
 ```
@@ -27,26 +29,72 @@ load("voterid.RData")
 
 The link above contains data from ``Hicks et al. 2015:  A Principle or a Strategy?  Voter Identificaqtion Laws and Partisan Competition in the American States''
 
-* *photo* is equatl to $1$ if a state has legislation that requires voters to show photo ID at the polling booth, and $0$ if they do not have to have this requirement.
+* `photo` is equatl to $1$ if a state has legislation that requires voters to show photo ID at the polling booth, and $0$ if they do not have to have this requirement.
 
-* *fraud* is the average number of voter fraud cases prosecuted in a given state since 2001.
+* `fraud` is the average number of voter fraud cases prosecuted in a given state since 2001.
 
-* *election_margin* is the average partisan vote margin ($\%$ Republican - $\%$ Democratic) in a state since 2001.
+* `election_margin` is the average partisan vote margin ($\%$ Republican - $\%$ Democratic) in a state since 2001.
 
-* *gopleg* is the average $\%$ of a state's legislature that is Republican.
+* `gopleg` is the average $\%$ of a state's legislature that is Republican.
 
 # Questions
 
-1. Use OLS to estimate a linear probability model using *photo* as the dependent variable, and *fraud*, *election_margin*, and *gopleg* as independent variables.  Obtain predicted probabilities that *photo* $= 1$ under two or more hypothetical scenarios.  Discuss your results.
+----
+
+1. Use OLS to estimate a linear probability model using `photo` as the dependent variable, and `fraud`, `election_margin`, and `gopleg` as independent variables.  Obtain predicted probabilities that `photo` $= 1$ under two or more hypothetical scenarios.  Discuss your results.
 
 ```{r OLS, include=TRUE}
-sink("log.txt", append = TRUE, type = 'output', split=TRUE)
-model.1 <- lm(photo~fraud+election_margin+gopleg, data = voterid); summary(model.1) #stargazer(model.1, type = 'text')
-b1 <- predict(model.1); b1
-sink()
+#sink("log.txt", append = TRUE, type = 'output', split=TRUE)
+stargazer(voterid, type = 'text', title = "Descriptive Statistics", 
+          digits = 5, min.max = F, na.rm = T)
+attach(voterid)
+mean_p <- mean(photo, na.rm = T)
+mean_f <- mean(fraud, na.rm = T)
+mean_e <- mean(election_margin, na.rm = T)
+mean_g <- mean(gopleg, na.rm = T)
+sd_f <- sd(fraud, na.rm = T)
+sd_g <- sd(gopleg, na.rm = T)
+model.1 <- lm(photo~fraud+election_margin+gopleg, data = voterid); summary(model.1) 
+predict_ols <- function(x1, x2, x3){
+  y <- (model.1$coefficients[1] + x1 * model.1$coefficients[2] + 
+    x2 * model.1$coefficients[3] + x3 * model.1$coefficients[4])
+return(as.numeric(y))
+}
+# Point Predictions for 'fraud' and `gopleg` using the `lm()` function
+predict_fraud1 <- predict_ols((mean_f + (sd_f)), mean_e, mean_g); predict_fraud1
+predict_gopleg1 <- predict_ols(mean_f, mean_e, (mean_g + (sd_g))); predict_gopleg1
+#sink()
 ```
 
-2.  Run a logistic regression model using *photo* as the dependent variable, and *fraud*, *election_margin*, and *gopleg* as independent variables.  Obtain predicted probabilities that *photo* $= 1$ under two or more hypothetical scenarios.  Discuss your results, and compare with your results from model $1$.
+<span style="color:blue">**I calculated the point predictions for `fraud` one standard deviation above its mean.  Holding the other variables constant at their means, a one standard deviation increase in a state having a voter fraud case brought before the court inidicates $45.63\%$ point increase in the likelihood of of the state having a photo ID law.  This indicates that states with photo ID requirements are $45.63\%$ more likely to have fraud cases identified and tried than states without photo ID laws.**</span>
+
+<span style="color:blue">**For my second point prediction I calculated one standard deviation above the mean of `gopleg`. Keeping the other variables at their means, on average a one standard deviation increase in the likelihood of a state having a GOP legislature indicates a $54.06\%$ increase in the likelihood of a state having a photo voter ID law.**</span>
+
+----
+
+2.  Run a logistic regression model using `photo` as the dependent variable, and `fraud`, `election_margin`, and `gopleg` as independent variables.  Obtain predicted probabilities that `photo` $= 1$ under two or more hypothetical scenarios.  Discuss your results, and compare with your results from model $1$.
+
+
+```{r glm, include=TRUE}
+model.2 <- glm(photo~fraud+election_margin+gopleg, data = voterid); summary(model.2) 
+predict_glm <- function(x1, x2, x3){
+  inverse_link <- -1*(model.2$coefficients[1] + x1 * model.2$coefficients[2] + 
+    x2 * model.2$coefficients[3] + x3 * model.2$coefficients[4])
+  y <- 1/(1+exp(inverse_link))
+return(as.numeric(y))
+}
+
+# Point predictions for `fraud` and `gopleg` using the `glm()` function.
+predict_fraud3 <- predict_glm((mean_f + sd_f), mean_e, mean_g); predict_fraud3
+predict_gopleg3 <- predict_glm(mean_f, mean_e, (mean_g + sd_g)); predict_gopleg3
+
+table_1 <- data.frame(predict_fraud1,predict_fraud3,predict_gopleg1,predict_gopleg3)
+stargazer(table_1, type = "text", nobs = FALSE, min.max = FALSE, 
+          title = "Table 1 - Comparative Statics")
+difference_fraud <- (predict_fraud3-predict_fraud1); difference_fraud
+difference_gopleg <- (predict_gopleg3-predict_gopleg1); difference_gopleg
+```
+<span style="color:blue">**I calculated the same hypothetical situations for the logistic model that I did for the linear model so that comparison was more simple.  Table 1 shows the four predictions side by side.  The predictions for the `fraud` variables and the `gopleg` variables show stark differences.  Holding the other vairables at their means, the average logistic model for `fraud` was $15.58\%$ points higher than the linear model.  Likewise, when holding the other variables constant at their means, the average value for `gopleg` under the logistic model was $9.14\%$ percentage points higher than the linear model.**</span>
 
 ## notes
 
