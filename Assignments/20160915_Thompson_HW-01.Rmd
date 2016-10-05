@@ -2,7 +2,7 @@
 title: "20160915_Thompson_HW-01"
 author: "Nick Thompson"
 date: "September 15, 2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
