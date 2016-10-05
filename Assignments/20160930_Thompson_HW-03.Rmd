@@ -45,8 +45,6 @@ The link above contains data from ``Hicks et al. 2015:  A Principle or a Strateg
 
 ```{r OLS, include=TRUE}
 #sink("log.txt", append = TRUE, type = 'output', split=TRUE)
-stargazer(voterid, type = 'text', title = "Descriptive Statistics", 
-          digits = 5, min.max = F, na.rm = T)
 attach(voterid)
 mean_p <- mean(photo, na.rm = T)
 mean_f <- mean(fraud, na.rm = T)
@@ -60,6 +58,8 @@ predict_ols <- function(x1, x2, x3){
     x2 * model.1$coefficients[3] + x3 * model.1$coefficients[4])
 return(as.numeric(y))
 }
+stargazer(voterid, type = 'text', title = "Descriptive Statistics", 
+          digits = 5, min.max = F, na.rm = T)
 # Point Predictions for 'fraud' and `gopleg` using the `lm()` function
 predict_fraud1 <- predict_ols((mean_f + (sd_f)), mean_e, mean_g); predict_fraud1
 predict_gopleg1 <- predict_ols(mean_f, mean_e, (mean_g + (sd_g))); predict_gopleg1
