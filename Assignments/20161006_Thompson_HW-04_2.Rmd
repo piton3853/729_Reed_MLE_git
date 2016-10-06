@@ -169,6 +169,7 @@ for(i in 1:n.draws){
 
 summary(p.effect.mean)
 quantile(p.effect.mean, c(.025,.975))
+
 ```
 
 3.  Use the “obsval” command to create 1000 simulated coefficients. Report the average effect and the 95% confidence interval around your results. (see note 2)
@@ -199,7 +200,13 @@ mod2$effect.high.ci
 mod2$effect.low.ci
 quantile(mod2$effect.preds, c(0.025, 0.975))
 
+# Histograms of the two predicted distributions
+hist(p.effect.mean, main = "Question 2")
+hist(mod2$effect.preds, main = "Question3")
+
 ```
+
+There is a decided difference between the outcomes from question two and question three.  In question two we see confidence intervals from [`r quantile(p.effect.mean, c(0.025,0.975))`].  In question three we see a confidence interval from [`r mod2$effect.high.ci`, `r mod2$effect.low.ci`].  As seen in the two histograms above, the `1,000` draw model has a normal shape while the `10` draw model is not normal.  Based upon these outcomes, we can assume the confidence interval from question three is more accurate.
 
 # notes
 
