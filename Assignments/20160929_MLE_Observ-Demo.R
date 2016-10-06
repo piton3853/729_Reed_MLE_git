@@ -2,7 +2,7 @@
 
 rm(list=ls())
 cat("\014")
-install.packages("devtools")
+#install.packages("devtools")
 library("devtools")
 devtools::install_github("chrismeserole/obsval")
 

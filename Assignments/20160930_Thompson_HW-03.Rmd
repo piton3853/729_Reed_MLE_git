@@ -102,7 +102,7 @@ difference_gopleg <- (predict_gopleg3-predict_gopleg1); difference_gopleg
 
 2.  We used the code below to get predicted probabilities from the probit model.  You will need to modify this slightly to get predictions form a logit, just remember that:  $Pr(Y=1|X1,X2) = \frac{1}{1+e^-(B_0+B_1X1+B_2X2)}$
 
-```{r generic code, include=TRUE}
+```{r generic code, include=TRUE, warning=FALSE}
 set.seed(42)
 n <- 1000
 x1 <- rnorm(n)

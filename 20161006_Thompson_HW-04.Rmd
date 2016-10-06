@@ -14,6 +14,8 @@ library(gmodels)
 library(dplyr)
 library(ggplot2)
 library("devtools")
+library(obsval)
+library(mvtnorm)
 rm(list=ls())
 cat("\014")
 ```
@@ -48,9 +50,18 @@ The link above contains data from ``Hicks et al. 2015:  A Principle or a Strateg
 # run probit, show results
 voterid2 <- na.omit(voterid)
 #View(voterid2)
-stargazer(voterid2, type = 'text')
 voterid2$mean_gopleg <- mean(voterid2$gopleg)
-voterid2$sd_gopleg <- sd(voterid2$gopleg)
+voterid2$sd_gopleg <- 0.5*sd(voterid2$gopleg)
+voterid2$med_g = median(voterid2$gopleg)
+stargazer(voterid2, type = 'text')
+g <- ggplot(voterid2,aes(x=gopleg))
+g + geom_histogram(aes(y=..density..),binwidth = 7.5) +
+  geom_density() +
+  geom_vline(xintercept = voterid2$mean_gopleg,linetype='longdash') +
+  geom_vline(xintercept = voterid2$med_g)
+gopleg_obs_low <- voterid2$mean_gopleg - voterid2$sd_gopleg
+gopleg_obs_high <- voterid2$mean_gopleg + voterid2$sd_gopleg
+
 
 # run probit, show results
 (model_1 <- glm('photo ~ fraud + election_margin + gopleg', 
@@ -77,13 +88,13 @@ summary(voterid2$pprob_test) # should be zeros
 voterid2$pprob_gopleg_upsd <- pnorm(model_1$coef['(Intercept)'] + 
                                  model_1$coef['fraud']*voterid2$fraud + 
                                  model_1$coef['election_margin']*voterid2$election_margin + 
-                                 model_1$coef['gopleg']*(voterid2$mean_gopleg+voterid2$sd_gopleg))
+                                 model_1$coef['gopleg']*gopleg_obs_high)
 summary(voterid2$pprob_gopleg_upsd)
 
 voterid2$pprob_gopleg_downsd <- pnorm(model_1$coef['(Intercept)'] + 
                                  model_1$coef['fraud']*voterid2$fraud + 
                                  model_1$coef['election_margin']*voterid2$election_margin + 
-                                 model_1$coef['gopleg']*(voterid2$mean_gopleg-voterid2$sd_gopleg))
+                                 model_1$coef['gopleg']*gopleg_obs_low)
 summary(voterid2$pprob_gopleg_downsd)
 
 voterid2$pprob_effect <- voterid2$pprob_gopleg_upsd - voterid2$pprob_gopleg_downsd
@@ -91,15 +102,104 @@ summary(voterid2$pprob_effect)
 
 ```
 
-**The probability that `photo` $=1$ when `gopleg` is $1$ standard deviation above its mean is `r mean(voterid2$pprob_gopleg_upsd)`, and the probability that `photo` $=1$ when `gopleg` is $1$ standard deviation below its mean is `r mean(voterid2$pprob_gopleg_downsd)`  The difference between the two is `r mean(voterid2$pprob_effect)`.**
+**Based upon a histogram plot of the `gopleg`, I chose to use one standard deviation distance as my two points.  One half of a standard deviation below the mean and one half above for `gopleg`.  The probability that `photo` $=1$ when `gopleg` is $\frac{1}{2}$ standard deviation above its mean is `r mean(voterid2$pprob_gopleg_upsd)`, and the probability that `photo` $=1$ when `gopleg` is $\frac{1}{2}$ standard deviation below its mean is `r mean(voterid2$pprob_gopleg_downsd)`  The difference between the two is `r mean(voterid2$pprob_effect)`.**
 
-2.  Use the “for loops” code to simulate ten draws from a set of random coefficients (see note 1). Calculate the mean difference between the two hypothetical scenarios, and report the 96% confidence interval around your results.
+2.  Use the “for loops” code to simulate ten draws from a set of random coefficients (see note 1). Calculate the mean difference between the two hypothetical scenarios, and report the 95% confidence interval around your results.
 
-```{r loops - 01, include = TRUE}
+```{r loops - 01, include = TRUE, warning=FALSE}
+##
+##########2. Iterative for loops (ie, slow way)----
+## 
 
+n.draws <- 10
+set.seed(42)
+sim.coefs <- rmvnorm(n.draws, model_1$coef, vcov(model_1)) 
+sim.coefs
+p.effect.mean <- numeric(n.draws)
+p.high.mean <- numeric(n.draws)
+p.low.mean	<- numeric(n.draws)
+p.baseline 	<- numeric(n.draws)
+
+n.obs <- length(voterid2[[1]])
+
+for(i in 1:n.draws){ 
+  
+  # For the current set of coefficients, calculate a
+  # latent probability for all observations using observed values
+  
+  # first, set up vectors to store our linear predictors
+  Xb.baseline 	<- numeric(n.obs)
+  Xb.high 	<- numeric(n.obs)
+  Xb.low	 	<- numeric(n.obs)
+  
+  # second, for current set of coefs, loop through each observation
+  # and calculate mean, high and low linear predictors
+  for(j in 1:n.obs){
+    Xb.baseline[j] <- sim.coefs[i,1] +
+      sim.coefs[i,2]*voterid2$fraud[j] + 
+      sim.coefs[i,3]*voterid2$election_margin[j] + 
+      sim.coefs[i,4]*voterid2$gopleg[j] 
+    
+    
+    Xb.high[j] <- sim.coefs[i,1] + 
+      sim.coefs[i,2]*voterid2$fraud[j] + 
+      sim.coefs[i,3]*voterid2$election_margin[j] + 
+      sim.coefs[i,4]*gopleg_obs_high
+    
+    Xb.low[j] <- sim.coefs[i,1] + 
+      sim.coefs[i,2]*voterid2$fraud[j] + 
+      sim.coefs[i,3]*voterid2$election_margin[j] + 
+      sim.coefs[i,4]*gopleg_obs_low   
+  }
+  
+  # third, transform linear predictors into probabilites
+  predict.baseline	<- pnorm(Xb.baseline)
+  predict.high	<- pnorm(Xb.high)
+  predict.low 	<- pnorm(Xb.low)
+  predict.effect  <- predict.high - predict.low
+  
+  # fourth, for current set of coefs, store the average mean, high and 
+  # low probability across all observations in the data set 
+  p.baseline[i]		<-mean(predict.baseline, na.rm=TRUE)
+  p.high.mean[i]	<- mean(predict.high, na.rm=TRUE)
+  p.low.mean[i]	<- mean(predict.low, na.rm=TRUE)
+  p.effect.mean[i] <- mean(predict.effect,na.rm=TRUE) 
+  
+}
+
+summary(p.effect.mean)
+quantile(p.effect.mean, c(.025,.975))
 ```
 
 3.  Use the “obsval” command to create 1000 simulated coefficients. Report the average effect and the 95% confidence interval around your results. (see note 2)
+
+```{r obsval command, include=TRUE, warning=FALSE}
+#4. FUNCTIONAL WAY----
+
+mod2 <- obsval(photo~fraud+election_margin+gopleg,
+              data = voterid2, 
+              reg.model = "probit",
+              n.draws = 1000,
+              effect.var = "gopleg", 
+              effect.vals = c(gopleg_obs_low,gopleg_obs_high), # 1/2 SD below & 1/2 SD above mean
+              verbose = TRUE)
+
+# display model results
+summary(mod2$model)
+
+# get mean effect of 'gopleg'
+mean(mod2$effect.preds) 
+mod2$effect.mean
+mean(mod2$preds[, 2] - mod2$preds[, 1])
+names(mod2)
+
+head(mod2$sim.coefs)
+
+mod2$effect.high.ci
+mod2$effect.low.ci
+quantile(mod2$effect.preds, c(0.025, 0.975))
+
+```
 
 # notes
 
