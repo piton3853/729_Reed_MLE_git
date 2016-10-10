@@ -119,3 +119,29 @@ Summary:  Interpreting the Coefficients, include the AIC
 stargazer(model_1, header = F)
 ```
 
+Log Likelihood
+
+```{r loglikelihood, echo=TRUE}
+#Likelihood Ratio Tests
+logLik(m0)
+logLik(m)
+lr.test = -2*(logLik(m0) - logLik(m))
+lr.test
+lrtest(m0,m)
+```
+
+Bayes
+```{r bayes, echo=TRUE}
+#Bayesian Information Criterion
+BIC<- -2*logLik(m)+log(n)*(length(coef(m))+1)
+BIC
+```
+
+AIC
+```{r AIC, echo=TRUE}
+#Akaike’s Information Criterion
+length(coef(m))
+AIC<- -2*(logLik(m))+2*(length(coef(m)))
+AIC
+```
+
