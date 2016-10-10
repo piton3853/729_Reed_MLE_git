@@ -16,6 +16,7 @@ library(ggplot2)
 library("devtools")
 library(obsval)
 library(mvtnorm)
+library(arm)
 rm(list=ls())
 cat("\014")
 ```
