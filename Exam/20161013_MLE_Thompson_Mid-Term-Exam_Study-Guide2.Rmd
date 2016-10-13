@@ -5,29 +5,30 @@ date: "10/13/2016"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, echo=T, eval=T, include=F, cache=F, results='asis'}
 knitr::opts_chunk$set(echo = TRUE)
 rm(list=ls())
 cat("\014")
 # devtools::install_github("chrismeserole/obsval")
-library(foreign)
-library(stargazer)
 library(devtools)
-library(obsval)
 library(mvtnorm)
 library(arm)
-library(vioplot)
 library(lmtest)
 library(knitr)
 library(readstata13)
 library(ggplot2)
 library(moments)
 library(MASS)
+library(foreign)
+library(obsval)
+library(stargazer)
+library(vioplot)
+library(lmtest)
 ```
 
 Pull in Data
 
-```{r, set working dir and load data, echo=TRUE, eval=TRUE}
+```{r, set working dir and load data, echo=T, eval=T, include=T, cache=F, results='asis'}
 setwd("~/Documents/GitHubRepo/729_Reed_MLE_git/Exam/CCES")
 #data <- read.csv(file = "https://raw.githubusercontent.com/Neilblund/729A/master/data/voterid.csv", header = TRUE, sep = ",")
 #or
@@ -42,7 +43,7 @@ data <- x
 
 # Introduction:
 
-```{r loda data & write essential variables, echo=TRUE, eval=TRUE}
+```{r loda data & write essential variables, echo=T, eval=T, include=T, cache=F, results='asis'}
 #descriptive statistics for all variables
 #stargazer(voterid, type = 'text')
 # run probit, show results
@@ -73,7 +74,7 @@ stargazer(data, type = 'text', header = F)
 
 Plot a histogram to see what the data looks like.  Identify skewness for determining if using mean, median, or tail.
 
-```{r independent variable plot, include=TRUE, echo=TRUE, eval=TRUE}
+```{r independent variable plot, echo=T, eval=T, include=T, cache=F, results='asis'}
 g <- ggplot(data,aes(x=var1))
 # adjust the binwidth to the desired width so the histogram tells you something.
 # the geom_vlines give you lines to mark the mean and median.
@@ -92,11 +93,87 @@ data$var1_obs_high <- data$mean_var1 + data$sd_var1
 
 Calculate the average effect of `variable name` using observed values.
 
-The logit model.
+Neil's `simple_analysis.R` code for predicted values (my results should be different from the author's).
 
-```{r binomial model, echo=TRUE, eval=TRUE}
+```{r simple_analysis, echo=T, eval=T, include=T, cache=F, results='asis'}
+#using obsval for logistic regression and prediction----
+
+# nick's model
 # run binomial, show results
-model_1l <-glm(voted~age+income+
+model_1b <-obsval(voted~age+income+
+                 as.factor(race)+divergence+educ+
+                 female+competitive+as.factor(st_id),
+               data=data,
+               reg.model = "logit",
+               n.draws = 1000,
+               "effect.var"="divergence",
+               effect.vals=c(0,1),
+               verbose=T,
+               baseline.category="Voted")
+
+mymodel<-obsval(binary_warsup~female, #the regression model y~x1+x2+x3
+                  data=studentVote,         #the dataset
+                  reg.model="logit",          #the link function
+                  n.draws=1000,             #the number of random draws
+                   "effect.var"="female",       #the variable of interest
+                  effect.vals=c(0,1) ,       #the low and high values of the IV of interest
+                   verbose=TRUE, 
+                  baseline.category=oppose) #this is the baseline category of your dependent variable
+
+#results----
+
+#this gets the basic model output
+summary(mymodel$model)
+
+#average effect of moving from low to high
+mymodel$effect.mean
+#low ci
+mymodel$effect.low.ci
+#high ci
+mymodel$effect.high.ci
+
+#predicted probability
+mymodel$means
+
+#plots----
+
+#violin plots
+plot.new()
+vioplot(mymodel$preds[,1], mymodel$preds[,2], names=c("male","female"), 
+        col="red", horizontal=TRUE)
+title("Predicted Probability")
+
+#coefficient plots
+vioplot(mymodel$sim.coef[,1], mymodel$sim.coef[,2], names=c(expression(beta[0]),expression(beta[age])))
+
+#histogram of predicted effect sizes
+hist(mymodel$preds[,1]-mymodel$preds[,2], main="Simulated Effects", xlab="effects")
+
+
+#Model fit----
+AIC(mymodel$model)
+BIC(mymodel$model)
+
+#comparison with null model
+nullModel<-glm(studentVote$binary_warsup~1, family="binomial")
+
+#likelihood ratio test (using base R)
+lr.test = -2*(logLik(nullModel) - logLik(mymodel$model))
+1-pchisq(as.numeric(lr.test), df=1)
+
+
+#likelihood ratio test (using lmtest)
+library(lmtest)
+lrtest(mymodel$model, nullModel)
+```
+
+
+
+The binomial model.
+
+```{r binomial model, echo=T, eval=T, include=T, cache=F, results='asis'}
+# run binomial, show results
+model_1b <-glm(voted~age+income+
                  as.factor(race)+divergence+educ+
                  female+competitive+as.factor(st_id),
                family="binomial",data=data)
@@ -104,7 +181,7 @@ model_1l <-glm(voted~age+income+
 
 A table of the logit model.
 
-```{r logit model stargazer - 2, include=F, echo=F, eval=F, results='asis'}
+```{r binomial model stargazer, echo=F, eval=F, include=F, cache=F, results='asis'}
 summary(model_1l)
 stargazer(model_1l,header=F) # if you want to see a print out in your console, 
                              # then after model_1l typt this 
@@ -113,7 +190,7 @@ stargazer(model_1l,header=F) # if you want to see a print out in your console,
 
 The logit predicted probabilities.
 
-```{r logit predicted probabilities, include=T, echo=T, eval=T}
+```{r logit predicted probabilities, echo=T, eval=T, include=T, cache=F, results='asis'}
 # generate predicted probabilities automatically
 data$pprob_l <- predict(model_1l,type="response")
 
@@ -133,7 +210,7 @@ data$pprob_manual_l <- pnorm(model_1l$coef['(Intercept)'] +
 data$pprob_test_l <- data$pprob_l - data$pprob_manual_l
 ```
 
-```{r logit test summary, echo=F, eval=F, include=F, results='asis'}
+```{r logit test summary, echo=F, eval=F, include=F, cache=F, results='asis'}
 summary(data$pprob_test_l) # should be zeros
 ```
 
@@ -168,7 +245,7 @@ A way to do this with probit.
 
 A table printout of the probit model.
 
-```{r probit model stargazer - 2, echo=F, eval=F, include=F, results='asis'}
+```{r probit model stargazer - 2, echo=F, eval=F, include=F, cache=F, results='asis'}
 #summary(model_1p)
 stargazer(model_1p,type = 'text',header=F)
 ```
@@ -191,7 +268,7 @@ data$pprob_test_p <- data$pprob_p - data$pprob_manual_p
 
 A summary of the probit test.
 
-```{r probit test summary, echo=F, eval=F, include=F, results='asis'}
+```{r probit test summary, echo=F, eval=F, include=F, cache=F, results='asis'}
 summary(data$pprob_test_p) # should be zeros
 ```
 
@@ -221,7 +298,7 @@ summary(data$pprob_effect_p)
 
 Summary:  Interpreting the Coefficients, include the AIC
 
-```{r note to self, echo=F, eval=F, include=F, results='asis'}
+```{r note to self, echo=F, eval=F, include=F, cache=F, results='asis'}
 stargazer(model_1p, header = F)
 ```
 
