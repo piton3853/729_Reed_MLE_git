@@ -2,7 +2,7 @@
 title: "Hamner & Kalkan Replication"
 author: "Nick Thompson"
 date: "10/12/2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -157,9 +157,9 @@ A table printout of the probit model.
 
 ```{r probit model stargazer - 2, echo=TRUE, eval=TRUE, results='asis'}
 # summary(model_1p)
-stargazer(model_1p, type = 'text',header=F, title = "Hamner & Kilkan Probit Table 1 - Replication")
+stargazer(model_1p, title = "H&K Probit Table 1 Replication")
 # type = 'text',
-# 
+# header=F, 
 ```
 
 Calculate the predicted probabilities in the probit model.
