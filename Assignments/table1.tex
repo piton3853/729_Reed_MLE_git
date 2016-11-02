@@ -1,0 +1,44 @@
+% Please add the following required packages to your document preamble:
+\documentclass[12bp]{report}
+\usepackage[margin=1in]{geometry}               % See geometry.pdf to learn the layout options. There are lots.
+\geometry{
+	%total={210mm,297mm},
+	%left=1in,
+	%right=1in,
+	bindingoffset=0mm,
+	top=1in,
+	bottom=1in
+}
+\usepackage{setspace}
+\doublespacing
+\usepackage{fontspec,xltxtra,xunicode}
+\defaultfontfeatures{Mapping=tex-text}	% Sets Times New Roman Fonts
+\setromanfont[Mapping=tex-text]{Times New Roman}	% Sets Times New Roman Fonts
+\setsansfont[Scale=MatchLowercase,Mapping=tex-text]{Times New Roman}	% Sets Times New Roman Fonts
+%\usepackage[document]{ragged2e} % Returns ragged right
+\setmonofont[Scale=MatchLowercase]{Times New Roman} 	% Sets Times New Roman Fonts
+\usepackage{indentfirst}  % Indents the first paragraph after a section heading
+
+%%% Table Engine %%%
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\restylefloat{table}
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+\begin{document}
+\begin{table}[]
+\centering
+\caption{Side-by-Side Comparisons}
+\label{my-label}
+\begin{tabular}{ccccccc}
+          & \multicolumn{6}{c}{{\ul Dependent Variable}}                                                                                \\
+          & {\ul vote40 (OLS)} & {\ul vote40 (MLE)} & {\ul vote30 (OLS)} & {\ul vote30 (MLE)} & {\ul vote20 (OLS)} & {\ul vote20 (MLE)} \\
+gdppcap08 & 0.00002            & 0.00002            & 0.0005             & 0.00048            & 0.0002             & 0.0002             \\
+          & (0.001)            & (0.00000)          & (0.0002)           & (0.0000)           & (o.0003)           & (0.0000)           \\
+constant  & 66.450             & 66.515             & 57.013             & 57.039             & 61.860             & 61.943             \\
+          & (3.571)            & (15.52)            & (3.730)            & (14.58)            & (3.762)            & (12.118)          
+\end{tabular}
+\end{table}
+
+\end{document}

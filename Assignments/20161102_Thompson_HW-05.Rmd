@@ -1,0 +1,196 @@
+---
+title: 'Homework:  Ordered Models - GVPT 729A'
+author: "Nick Thompson"
+date: "November 2, 2016"
+output: html_document
+---
+
+```{r load libraries, include=F}
+#rm(list=ls())
+#cat("\014")
+require(foreign)
+library(mvtnorm)
+library(vioplot)
+library(MASS)
+library(VGAM)
+library(stargazer)
+library(ggplot2)
+```
+
+# 1 Ordered Logit / Probit
+
+Use the following code to create data on militarized dispute escalation:
+
+```{r generate data, include=T}
+set.seed(123)
+n <- 1000
+dispute <- character(n)
+democracy<-runif(n)
+power<-runif(n)
+territory<-runif(n)
+y <- -1*democracy+2*territory+power+rnorm(n, mean = 0, sd = 1)
+summary(y)
+dispute[y<=-1] <- "Threat"
+dispute[y>-1 & y<=1] <- "Show of Force"
+dispute[y>1 & y<=3] <- "Use of Force"
+dispute[y>3] <- "War"
+dispute<-ordered(dispute, levels=c("Threat", "Show of Force", "Use of Force", "War"))
+df_data <- data.frame(dispute,democracy,power,territory)
+```
+
+```{r visualize the data, include=T}
+head(df_data)
+cdplot(df_data$dispute~df_data$democracy, ylab="dispute",xlab="democracy")
+```
+
+This model should explain the escalation of a dispute:
+
+$dispute_t = \beta_1 * democracy_t + \beta_2 * territory_t + \beta_3 * power_t + \epsilon_t$
+
+The dependent variable dispute, is ordered.  So we need to model this as an ordered probit or ordered logit.  Estimate both of these models and compare the results to those obtained using least squares.
+
+```{r logit model, include=T}
+ml_l <- polr(dispute ~ democracy + territory + power,
+             data = df_data,
+             Hess=TRUE, 
+             method="logistic")
+```
+
+```{r probit model, include=T}
+ml_p <- polr(dispute ~ democracy + territory + power,
+             data = df_data,
+             Hess=TRUE,
+             method="probit")
+```
+
+```{r OLS model, include=F, warning=F, error=T, echo=F}
+ml_o <- lm(dispute ~ democracy + territory + power,
+           data = df_data)
+```
+
+```{r stargazer 1, include=T, echo=T, eval=T, results='asis'}
+stargazer(ml_l, ml_p, ml_o, style = 'all', type = 'html', header = F)
+```
+
+# 2 Observed Values
+
+Show the effect of moving `democracy` from its minimum to maximum value on the probability of observing the four categories of the dependent variable, `dispute`.  Use the observed value approach and violin plots to show the effect of `democracy`.
+
+```{r observed values - democracy, include=T, echo=T, eval=T, results='asis'}
+#observed values for ordered logit
+beta<-c(ml_l$coefficients, ml_l$zeta)
+beta
+vcov(ml_l)
+n.draws <- 500
+
+demo_min <- min(df_data$democracy)
+demo_max <- max(df_data$democracy)
+set.seed(123)
+sim.coefs <- rmvnorm(n.draws, beta, vcov(ml_l)) 
+```
+
+```{r reorder the columns, include=T, echo=T, eval=T, results='asis'}
+#####reorder the columns - so the simulated coefficients are in the same order as the model######
+sim.coefs<-sim.coefs[, c(names(ml_l$zeta), names(ml_l$coefficients))]
+
+p_lower.1 <- numeric(n.draws)
+p_lower.2 <- numeric(n.draws)
+p_lower.3	<- numeric(n.draws)
+p_lower.4 <- numeric(n.draws)
+
+p_upper.1 <- numeric(n.draws)
+p_upper.2 <- numeric(n.draws)
+p_upper.3	<- numeric(n.draws)
+p_upper.4 <- numeric(n.draws)
+
+n.obs <- length(df_data[[1]])
+```
+
+```{r for loop, include=T, echo=T, eval=T, results='asis'}
+for(i in 1:n.draws){ 
+  
+  # For the current set of coefficients, calculate a
+  # latent probability for all observations using observed values
+  
+  # first, set up vectors to store our linear predictors
+  Xb_lower.1 	<- numeric(n.obs)
+  Xb_lower.2 	<- numeric(n.obs)
+  Xb_lower.3	<- numeric(n.obs)
+
+  Xb_upper.1 	<- numeric(n.obs)
+  Xb_upper.2 	<- numeric(n.obs)
+  Xb_upper.3	<- numeric(n.obs)
+
+  # second, for current set of coefs, loop through each observation
+  # and calculate mean, high and low linear predictors
+  for(j in 1:n.obs){
+    
+    ###reordered columns are now numbered consitently here ###
+    Xb_lower.1[j] <- sim.coefs[i,1]*1 + sim.coefs[i,2]*0 + sim.coefs[i,3]*0- #these are cutpoints
+      (sim.coefs[i,4]*demo_min + 
+      sim.coefs[i,5]*as.numeric(df_data$power[j]) + 
+      sim.coefs[i,6]*as.numeric(df_data$territory[j]))
+     
+    Xb_upper.1[j] <- sim.coefs[i,1]*1 + sim.coefs[i,2]*0 + sim.coefs[i,3]*0- #these are cutpoints
+      (sim.coefs[i,4]*demo_max + 
+      sim.coefs[i,5]*as.numeric(df_data$power[j]) + 
+      sim.coefs[i,6]*as.numeric(df_data$territory[j]))
+    
+    Xb_lower.2[j] <- sim.coefs[i,1]*0 + sim.coefs[i,2]*1 + sim.coefs[i,3]*0 - #these are cutpoints
+       (sim.coefs[i,4]*demo_min + 
+       sim.coefs[i,5]*as.numeric(df_data$power[j]) + 
+       sim.coefs[i,6]*as.numeric(df_data$territory[j]))
+     
+    Xb_upper.2[j] <- sim.coefs[i,1]*0 + sim.coefs[i,2]*1 + sim.coefs[i,3]*0 - #these are cutpoints
+     (sim.coefs[i,4]*demo_max + 
+     sim.coefs[i,5]*as.numeric(df_data$power[j]) + 
+     sim.coefs[i,6]*as.numeric(df_data$territory[j]))
+    
+    Xb_lower.3[j] <- sim.coefs[i,1]*0 + sim.coefs[i,2]*0 + sim.coefs[i,3]*1- #these are cutpoints
+       (sim.coefs[i,4]*demo_min + 
+       sim.coefs[i,5]*as.numeric(df_data$power[j]) + 
+       sim.coefs[i,6]*as.numeric(df_data$territory[j]))
+     
+    Xb_upper.3[j] <- sim.coefs[i,1]*0 + sim.coefs[i,2]*0 + sim.coefs[i,3]*1- #these are cutpoints
+       (sim.coefs[i,4]*demo_max + 
+       sim.coefs[i,5]*as.numeric(df_data$power[j]) + 
+       sim.coefs[i,6]*as.numeric(df_data$territory[j]))
+  }
+
+  ####calculate probability of being in category 1-4 for each observation####
+  p1_lower=plogis(Xb_lower.1)
+  p2_lower=plogis(Xb_lower.2)-plogis(Xb_lower.1)
+  p3_lower=plogis(Xb_lower.3)-plogis(Xb_lower.2)
+  p4_lower=1-plogis(Xb_lower.3)
+  
+  p1_upper=plogis(Xb_upper.1)
+  p2_upper=plogis(Xb_upper.2)-plogis(Xb_upper.1)
+  p3_upper=plogis(Xb_upper.3)-plogis(Xb_upper.2)
+  p4_upper=1-plogis(Xb_upper.3)
+  
+####average probability across all observations####
+ p_lower.1[i]<-mean(p1_lower)
+ p_lower.2[i]<-mean(p2_lower)
+ p_lower.3[i]<-mean(p3_lower)
+ p_lower.4[i]<-mean(p4_lower)
+ 
+ p_upper.1[i]<-mean(p1_upper)
+ p_upper.2[i]<-mean(p2_upper)
+ p_upper.3[i]<-mean(p3_upper)
+ p_upper.4[i]<-mean(p4_upper)
+}
+```
+
+```{r violin plots - democracy minimum, include=T, echo=T, eval=T, results='asis'}
+vioplot(p_lower.1,p_lower.2,p_lower.3,p_lower.4, names=c("Threat","Show of Force","Use of Force","War"), 
+        col="red")
+title("Predicted Probabilities: Democracy Min")
+```
+
+```{r violin plots democracy maximum, include=T, echo=T, eval=T, results='asis'}
+vioplot(p_upper.1,p_upper.2,p_upper.3,p_upper.4, names=c("Threat","Show of Force","Use of Force","War"), 
+        col="red")
+title("Predicted Probabilities: Democracy Max")
+```
+
+
