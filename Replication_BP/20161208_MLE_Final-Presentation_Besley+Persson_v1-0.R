@@ -159,7 +159,7 @@ for(i in 1:n.draws){
     ###   1   ###
     Xb.1[j] <-  sim.coefs[i,6]*1 +                               # Cutpoint 6   Identify these from sim.coefs
                 sim.coefs[i,7]*0 -                               # Cutpoint 7   Identify these from sim.coefs
-                  (sim.coefs[i,1]*as.numeric(logGDPpc) +                              # 1
+                  (sim.coefs[i,1]*as.numeric(repcw01$logGDPpc) +                              # 1
                     sim.coefs[i,2]*as.numeric(repcw01$parliament[j]) +    # 2
                     sim.coefs[i,3]*as.numeric(repcw01$major_oil[j]) +     # 3
                     sim.coefs[i,4]*as.numeric(repcw01$major_primary[j]) + # 4
@@ -167,7 +167,7 @@ for(i in 1:n.draws){
     ###   2   ###
     Xb.2[j] <-  sim.coefs[i,6]*0 +                               # Cutpoint 6   Identify these from sim.coefs
                 sim.coefs[i,7]*1 -                               # Cutpoint 7   Identify these from sim.coefs
-                  (sim.coefs[i,1]*as.numeric(logGDPpc) +                              # 1
+                  (sim.coefs[i,1]*as.numeric(repcw01$logGDPpc) +                              # 1
                     sim.coefs[i,2]*as.numeric(repcw01$parliament[j]) +    # 2
                     sim.coefs[i,3]*as.numeric(repcw01$major_oil[j]) +     # 3
                     sim.coefs[i,4]*as.numeric(repcw01$major_primary[j]) + # 4
@@ -181,7 +181,7 @@ for(i in 1:n.draws){
   # average probability across all observations
   p.1[i] <- mean(p1)
   p.2[i] <- mean(p2)
-  p.3[i] <- mean(p3r)
+  p.3[i] <- mean(p3)
   }
 }
 
