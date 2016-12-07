@@ -26,7 +26,7 @@ if(F){
   install.packages("pacman", repos='http://cran.us.r-project.org')
   pacman::p_load("foreign", "stargazer", "dplyr", "ggplot2", "devtools",
                  "obsval","mvtnorm","arm","vioplot","lmtest","knitr","readstata13",
-                 "moments","MASS","XLConnect","xlsx","plm","apsrtable","repmis","gridExtra","Hmsic")
+                 "moments","MASS","XLConnect","xlsx","plm","apsrtable","repmis","gridExtra","Hmsic","RCurl")
 }                #####
 ###############################
 
@@ -34,25 +34,34 @@ if(F){
 #####       LIBRARIES     #####
 if(T){ 
 # devtools::install_github("chrismeserole/obsval")
-library(foreign)
-library(ggplot2)
-library(dplyr)
-library(stargazer)
-library(devtools)
-library(obsval)
-library(mvtnorm)
-library(arm)
-library(vioplot)
-library(lmtest)
-library(knitr)
-library(readstata13)
-library(moments)
-library(MASS)
+library(foreign)      # Load Stata, .csv, .tbl
+library(stargazer)    # Nice LaTeX Table Outputs
+library(dplyr)        # data management
+library(ggplot2)      # nice graphs and plots
+library(devtools)     #
+library(obsval)       #
+library(mvtnorm)      #
+library(arm)          #
+library(vioplot)      # violin plots
+library(lmtest)       #
+library(knitr)        # knit files
+library(readstata13)  # read Stata 2013
+library(moments)      #
+library(MASS)         #
+library(XLConnect)    #
+library(xlsx)         # write .xlsx file
+library(plm)          # create time series fixed effects models
+library(apsrtable)    # Nice LaTeX Table Outputs
+library(repmis)       # this is needed to read the .RData file from GitHub
+library(gridExtra)    # this is the package Joel uses for putting two plots together
+library(lmtest)       # this is the package Joel uses for the function he wrote
+library(sandwich)     # this is the package Joel uses for the function he wrote
 library(repmis)
 library(gridExtra)
 library(apsrtable)
 library(plm)
 library(Hmisc)
+library(RCurl)
 }
 ###############################
 
@@ -60,21 +69,7 @@ library(Hmisc)
 #####         DATA        #####
 if(T){
   setwd("~/Documents/GitHubRepo/729_Reed_MLE_git/Replication_BP")
-  #repcw01 <- read.table(file = "BP.formatted.tab", header = TRUE, sep = "\t")
-  #repcw02 <- read.dta(file = "world panel 28 nov9.dta")
-  #repcw03 <- read.table(file = "bp_exact_for_analysis.tab", header = T, sep = "\t")
-  #repcw04 <- read.table(file = "replication.tab", header = T, sep = "\t")
-  #save(repcw01, file = "repcw01.RData")
-  #save(repcw02, file = "repcw02.RData")
-  #save(repcw03, file = "repcw03.RData")
-  #save(repcw04, file = "repcw04.RData")
-  #source_data("https://github.com/piton3853/729_Reed_MLE_git/blob/master/Replication_BP/repcw01.RData")
-  load('repcw01.RData')
-  #load('repcw02.RData')
-  #load('repcw03.RData')
-  #load('repcw04.RData')
-  #write.dta(repcw01,"~/Documents/GitHubRepo/729_Reed_MLE_git/Replication_BP/repcw01.dta")
-  #View(repcw01)
+  source_data("https://github.com/piton3853/729_Reed_MLE_git/raw/master/Replication_BP/repcw01.RData")
 }
 ###############################
 }                             # This is the end of the PREAMBLE
