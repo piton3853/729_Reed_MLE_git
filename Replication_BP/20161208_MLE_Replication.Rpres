@@ -1,18 +1,11 @@
-###############################
-#####     Nick Thompson   #####
-#####     12/08/2016      #####
-#####  Final Presentation #####
-#####     Replication     #####
-#####   Besley &  Persson #####
-##  Repression or Civil War? ##
-###############################
+Bessley & Persson (2009) - Replication
+========================================================
+author:  Nick Thompson 
+date: 12/08/2016
+autosize: true
 
-# SOURCE:  Besley & Persson (2009);
-# DATASET Source:  https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UN54HD
 
-################################################
-###             PREAMBLE                     ###
-################################################
+```{r Slide #1: Introduction / Load Preamble, echo=F,eval=T,include=F,warning=F}
 if(T){                            # This collapses the PREAMBLE
 # Clear & Reset
 # Clear Environment
@@ -26,7 +19,7 @@ if(F){
   install.packages("pacman", repos='http://cran.us.r-project.org')
   pacman::p_load("foreign", "stargazer", "dplyr", "ggplot2", "devtools",
                  "obsval","mvtnorm","arm","vioplot","lmtest","knitr","readstata13",
-                 "moments","MASS","XLConnect","xlsx","plm","apsrtable","repmis","gridExtra","Hmsic","RCurl","Zelig")
+                 "moments","MASS","XLConnect","xlsx","plm","apsrtable","repmis","gridExtra","Hmsic","RCurl")
 }                #####
 ###############################
 
@@ -59,7 +52,7 @@ library(lmtest)       # this is the package Joel uses for the function he wrote
 library(sandwich)     # this is the package Joel uses for the function he wrote
 library(Hmisc)
 library(RCurl)
-library(Zelig)
+library(xtable)
 }
 ###############################
 
@@ -74,6 +67,103 @@ if(T){
 }
 ###############################
 }                             # This is the end of the PREAMBLE
+```
+Besley & Persson Replication - Background & Puzzle
+========================================================
+
+* Background:  Peace, Repression, and Civil War are three alternative equilibrium outcomes in the interaction between an incumbent government and an opposition group.  Besley & Persson (2009) theory suggests a natural ordering of the regimes.
+
+* Puzzle:  What is the relationship between alternative equlibrium outcomes in the interaction between incumbents and opposition groups?  Said differently, is there a natural ordering across the three different types of states?
+
+* What am I doing?  I will extend this paper to include predicted probabilities.  This should provide deeper insight into Besley and Persson's hypotheses.
+
+Method - Data Analysis:  Ordered Logit
+========================================================
+
+* DV:  Peace, Repression or Civil War ordered variable.
+
+* IV 1: GDP per capita
+
+* IV 2: Parliamentary democracy dummy
+
+* IV 3: Large oil exporter dummy
+
+* IV 4: Large primary exporter dummy
+
+* IV 5: Weather shock numeric (frequency)
+
+Hypotheses
+========================================================
+
+* Hypothesis 1: As GDP per capita increases the likelihood of repression or civil war decreases (negative coefficients).
+
+* Hypothesis 2: Representative parliaments are less likely to have repression or civil war (negative coefficients).
+
+* Hypothesis 3: Large oil exporters are more likely to have repression and civil war (positive coefficients).
+
+* Hypothesis 4: Countries that are primarily exporters are less likely to have repression or civil war (negative coefficient).
+
+* Hypothesis 5: Countries prone to natural disasters are more likely to have repression or civil war (positive coefficient).
+
+
+Take a look at the Ordered Dependent Variable: peace, repression or civil war
+========================================================
+left: 40%
+```{r Slide 2: Plot Data,eval=F,echo=T,include=T}
+# View Data
+cdplot(repcw_years$rep_civwar_DV~
+         repcw_years$logGDPpc,
+       ylab = "Peace, Repression, & CivilWar",
+       xlab = "logGDP")
+```
+<div align="center">
+<img src="image02.tif" width=900 height = 831.77>
+</div>
+
+Model the Data
+========================================================
+```{r Slide 3: Model Data, echo=T,eval=T,include=T,warning=F}
+############################
+###  MODEL REPLICATION   ###
+############################
+model.repCivWar.01 <- MASS::polr(rep_civwar_DV ~ logGDPpc +  parliament + major_oil + major_primary + disaster, data = repcw_years, Hess=TRUE, method="logistic")
+```
+
+Model Output - Besley & Persson
+========================================================
+
+![Original Table](image03.tif)
+
+
+Model Output - Thompson
+========================================================
+
+![Console](image01.tif)
+
+***
+
+![with p-values](image04.tif)
+
+<small>`exp(model.repCivWar.01$coefficients)`</small>
+
+Predicted Probabilities - Violin Plots
+========================================================
+
+![Violin Plots](image05.tif)
+
+
+```{r load it, eval=F,echo=F,include=F}
+###############################
+#####     Nick Thompson   #####
+#####     12/08/2016      #####
+#####  Final Presentation #####
+#####     Replication     #####
+#####   Besley &  Persson #####
+##  Repression or Civil War? ##
+###############################
+
+# SOURCE:  Besley & Persson (2009);
+# DATASET Source:  https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UN54HD
 
 ###########################
 ###  BUILD DATAFRAMES   ###
@@ -122,7 +212,7 @@ ggplot(repcw_years, aes(x=logGDPpc, fill=p_r_cw)) +
 # View Data
 cdplot(repcw_years$p_r_cw~repcw_years$logGDPpc,ylab = "Peace, Repression, & CivilWar",xlab = "logGDP")
 
-hist(repcw_years02$disaster)
+hist(repcw_years$disaster)
 }                       # This is the end of the LOOK @ THE DATA Section
 
 ############################
@@ -137,7 +227,7 @@ hist(repcw_years02$disaster)
 # observed values for ordered logit -----------------------------------------
 beta <- c(model.repCivWar.01$coefficients, model.repCivWar.01$zeta); head(beta)
 model.repCivWar.01_vcov <- vcov(model.repCivWar.01)
-n.draws <- 500
+n.draws <- 50
 set.seed(42)
 sim.coefs <- rmvnorm(n.draws, beta,model.repCivWar.01_vcov); head(sim.coefs)
 
@@ -200,25 +290,24 @@ for(i in 1:n.draws){
 vioplot(p.1,p.2,p.3, names=c("Peace","Repression","Civil War"), 
         col="red")
 title("Predicted Probabilities")
+```
 
+```{r present it, eval=F,echo=F,include=F,results='asis'}
+b2<-glm((factor(rep_civwar_DV) < 1) ~ logGDPpc + parliament + major_oil + major_primary + disaster, family="binomial", data = repcw_years)
 
-b2<-glm(factor(rep_civwar_DV) < 1 ~ logGDPpc + parliament + major_oil + major_primary + disaster, family="binomial", data = repcw_years)
+b3<-glm((factor(rep_civwar_DV) == 1) ~ logGDPpc + parliament + major_oil + major_primary + disaster, family="binomial", data = repcw_years)
 
-b3<-glm(factor(rep_civwar_DV) == 1 ~ logGDPpc + parliament + major_oil + major_primary + disaster, family="binomial", data = repcw_years)
-
-b4<-glm(factor(rep_civwar_DV) > 1 ~ logGDPpc + parliament + major_oil + major_primary + disaster, family="binomial", data = repcw_years)
+b4<-glm((factor(rep_civwar_DV) > 1) ~ logGDPpc + parliament + major_oil + major_primary + disaster, family="binomial", data = repcw_years)
 
 d<-coef(b2) - coef(b3)
-stargazer(d,type='html')
+stargazer(d,type='html',header=F)
+```
 
-if(F){
-  # white board
-  
-  <div align="center">
-    <img src="image03.tif" width = 720 height = 651.6>
-      </div>
-      
-}
+
+Conclusion
+========================================================
+
+All else being equal, peace has a roughly 70 % chance of occurring, repression a 20% chance of occurrence, and Civil War a 10% chance when considering all of the factors in the model.  This is an optimistic outcome.  The next step for my replication is to incorporate the Export & Import price indicies and the Oil Export and Import price indicies.
 
 
 
